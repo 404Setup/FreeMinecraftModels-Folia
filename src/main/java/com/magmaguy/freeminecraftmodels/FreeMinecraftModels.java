@@ -15,6 +15,7 @@ import com.magmaguy.freeminecraftmodels.listeners.EntityTeleportEvent;
 import com.magmaguy.freeminecraftmodels.utils.VersionChecker;
 import com.magmaguy.magmacore.MagmaCore;
 import com.magmaguy.magmacore.command.CommandManager;
+import one.tranic.irs.PluginSchedulerBuilder;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
@@ -67,7 +68,7 @@ public final class FreeMinecraftModels extends JavaPlugin implements Listener {
         StaticEntity.shutdown();
         DynamicEntity.shutdown();
         LegacyHitDetection.shutdown();
-        Bukkit.getServer().getScheduler().cancelTasks(MetadataHandler.PLUGIN);
+        PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN).cancelTasks();
         HandlerList.unregisterAll(MetadataHandler.PLUGIN);
     }
 

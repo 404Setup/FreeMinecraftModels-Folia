@@ -7,7 +7,7 @@ import com.magmaguy.magmacore.command.AdvancedCommand;
 import com.magmaguy.magmacore.command.CommandData;
 import com.magmaguy.magmacore.command.SenderType;
 import com.magmaguy.magmacore.util.Logger;
-import org.bukkit.Bukkit;
+import one.tranic.irs.PluginSchedulerBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
@@ -43,11 +43,14 @@ public class MountCommand extends AdvancedCommand {
                 commandData.getStringArgument("models"),
                 (LivingEntity) commandData.getPlayerSender().getWorld().spawnEntity((commandData.getPlayerSender()).getLocation(), EntityType.HORSE));
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(MetadataHandler.PLUGIN, () -> {
-            ((Horse) dynamicEntity.getLivingEntity()).setTamed(true);
-            ((Horse) dynamicEntity.getLivingEntity()).setOwner(commandData.getPlayerSender());
-            ((Horse) dynamicEntity.getLivingEntity()).getInventory().setSaddle(new ItemStack(Material.SADDLE));
-            dynamicEntity.getLivingEntity().addPassenger(commandData.getPlayerSender());
-        }, 5);
+        PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                .task(() -> {
+                    ((Horse) dynamicEntity.getLivingEntity()).setTamed(true);
+                    ((Horse) dynamicEntity.getLivingEntity()).setOwner(commandData.getPlayerSender());
+                    ((Horse) dynamicEntity.getLivingEntity()).getInventory().setSaddle(new ItemStack(Material.SADDLE));
+                    dynamicEntity.getLivingEntity().addPassenger(commandData.getPlayerSender());
+                })
+                .delayTicks(5)
+                .run();
     }
 }

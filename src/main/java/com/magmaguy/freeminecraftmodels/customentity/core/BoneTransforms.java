@@ -116,7 +116,7 @@ public class BoneTransforms {
         if (VersionChecker.serverVersionOlderThan(21, 4))
             packetDisplayEntity.initializeModel(getDisplayEntityTargetLocation(), Integer.parseInt(bone.getBoneBlueprint().getModelID()));
         else
-            packetDisplayEntity.initializeModel(getDisplayEntityTargetLocation(), bone.getBoneBlueprint().getModelID());
+            packetDisplayEntity.initializeModel(getDisplayEntityTargetLocation(), Integer.parseInt(bone.getBoneBlueprint().getModelID()));
         packetDisplayEntity.setScale(2.5f);
         packetDisplayEntity.sendLocationAndRotationPacket(getDisplayEntityTargetLocation(), getDisplayEntityRotation());
     }
@@ -127,7 +127,7 @@ public class BoneTransforms {
         if (VersionChecker.serverVersionOlderThan(21, 4))
             packetArmorStandEntity.initializeModel(getArmorStandTargetLocation(), Integer.parseInt(bone.getBoneBlueprint().getModelID()));
         else
-            packetArmorStandEntity.initializeModel(getArmorStandTargetLocation(), bone.getBoneBlueprint().getModelID());
+            packetArmorStandEntity.initializeModel(getArmorStandTargetLocation(), Integer.parseInt(bone.getBoneBlueprint().getModelID()));
 
         packetArmorStandEntity.sendLocationAndRotationPacket(getArmorStandTargetLocation(), getArmorStandEntityRotation());
     }

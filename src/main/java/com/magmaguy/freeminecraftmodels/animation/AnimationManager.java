@@ -4,8 +4,8 @@ import com.magmaguy.freeminecraftmodels.MetadataHandler;
 import com.magmaguy.freeminecraftmodels.customentity.ModeledEntity;
 import com.magmaguy.freeminecraftmodels.dataconverter.AnimationsBlueprint;
 import com.magmaguy.freeminecraftmodels.utils.LoopType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import one.tranic.irs.PluginSchedulerBuilder;
+import one.tranic.irs.task.TaskImpl;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +23,7 @@ public class AnimationManager {
     private Animation jumpAnimation = null;
     private Animation deathAnimation = null;
     private Animation spawnAnimation = null;
-    private BukkitTask clock = null;
+    private TaskImpl clock = null;
     //This one is used for preventing default animations other than death from playing for as long as it is true
     private boolean animationGracePeriod = false;
 
@@ -55,22 +55,22 @@ public class AnimationManager {
         if (spawnAnimation != null) {
             states.add(spawnAnimation);
             if (idleAnimation != null)
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        animationGracePeriod = false;
-                    }
-                }.runTaskLater(MetadataHandler.PLUGIN, spawnAnimation.getAnimationBlueprint().getDuration());
+                PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                        .sync()
+                        .task(() -> animationGracePeriod = false)
+                        .delayTicks(spawnAnimation.getAnimationBlueprint().getDuration())
+                        .run();
         } else if (idleAnimation != null) states.add(idleAnimation);
 
-        clock = new BukkitRunnable() {
-            @Override
-            public void run() {
-                updateStates();
-                states.forEach(animation -> playAnimationFrame(animation));
-                modeledEntity.getSkeleton().transform();
-            }
-        }.runTaskTimer(MetadataHandler.PLUGIN, 0, 1);
+        clock = PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                .delayTicks(1)
+                .period(1)
+                .sync()
+                .task(() -> {
+                    updateStates();
+                    states.forEach(animation -> playAnimationFrame(animation));
+                    modeledEntity.getSkeleton().transform();
+                }).run();
 
     }
 
@@ -106,7 +106,7 @@ public class AnimationManager {
         }
     }
 
-    private BukkitTask graceResetTask = null;
+    private TaskImpl graceResetTask = null;
 
     public boolean playAnimation(String animationName, boolean blendAnimation) {
         Animation animation = animations.getAnimations().get(animationName);
@@ -115,12 +115,11 @@ public class AnimationManager {
         if (!blendAnimation) {
             states.clear();
             animationGracePeriod = true;
-            graceResetTask = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    animationGracePeriod = false;
-                }
-            }.runTaskLater(MetadataHandler.PLUGIN, animation.getAnimationBlueprint().getDuration());
+            graceResetTask = PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                    .sync()
+                    .delayTicks(animation.getAnimationBlueprint().getDuration())
+                    .task(() -> animationGracePeriod = false)
+                    .run();
         }
         animation.resetCounter();
         states.add(animation);

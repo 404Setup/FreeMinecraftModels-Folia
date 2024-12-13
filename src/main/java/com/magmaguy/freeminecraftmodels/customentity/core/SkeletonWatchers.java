@@ -1,11 +1,11 @@
 package com.magmaguy.freeminecraftmodels.customentity.core;
 
 import com.magmaguy.freeminecraftmodels.MetadataHandler;
+import one.tranic.irs.PluginSchedulerBuilder;
+import one.tranic.irs.task.TaskImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class SkeletonWatchers implements Listener {
     private final Skeleton skeleton;
     private final Set<UUID> viewers = new CopyOnWriteArraySet<>();
-    private BukkitTask tick;
+    private TaskImpl tick;
 
     public SkeletonWatchers(Skeleton skeleton) {
         this.skeleton = skeleton;
@@ -25,12 +25,12 @@ public class SkeletonWatchers implements Listener {
     }
 
     private void tick() {
-        tick = new BukkitRunnable() {
-            @Override
-            public void run() {
-                updateWatcherList();
-            }
-        }.runTaskTimerAsynchronously(MetadataHandler.PLUGIN, 0, 1);
+        tick = PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                .delayTicks(1)
+                .period(1)
+                .task(() -> updateWatcherList())
+                .async()
+                .run();
     }
 
     private void updateWatcherList() {

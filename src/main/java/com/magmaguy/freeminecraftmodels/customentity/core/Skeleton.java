@@ -5,6 +5,8 @@ import com.magmaguy.freeminecraftmodels.dataconverter.BoneBlueprint;
 import com.magmaguy.freeminecraftmodels.dataconverter.SkeletonBlueprint;
 import lombok.Getter;
 import lombok.Setter;
+import one.tranic.irs.PluginSchedulerBuilder;
+import one.tranic.irs.task.TaskImpl;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -35,7 +37,7 @@ public class Skeleton {
     @Getter
     @Setter
     private float currentHeadYaw = 0;
-    private BukkitTask damageTintTask = null;
+    private TaskImpl damageTintTask = null;
 
     public Skeleton(SkeletonBlueprint skeletonBlueprint) {
         this.skeletonBlueprint = skeletonBlueprint;
@@ -115,20 +117,25 @@ public class Skeleton {
 
     public void tint() {
         if (damageTintTask != null) damageTintTask.cancel();
-        damageTintTask = new BukkitRunnable() {
-            int counter = 0;
+        damageTintTask = PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                .task(new BukkitRunnable() {
+                    int counter = 0;
 
-            @Override
-            public void run() {
-                counter++;
-                if (counter > 10) {
-                    cancel();
-                    boneMap.values().forEach(bone -> bone.setHorseLeatherArmorColor(Color.WHITE));
-                    return;
-                }
-                boneMap.values().forEach(bone -> bone.setHorseLeatherArmorColor(Color.fromRGB(255, (int) (255 / (double) counter), (int) (255 / (double) counter))));
-            }
-        }.runTaskTimer(MetadataHandler.PLUGIN, 0, 1);
+                    @Override
+                    public void run() {
+                        counter++;
+                        if (counter > 10) {
+                            cancel();
+                            boneMap.values().forEach(bone -> bone.setHorseLeatherArmorColor(Color.WHITE));
+                            return;
+                        }
+                        boneMap.values().forEach(bone -> bone.setHorseLeatherArmorColor(Color.fromRGB(255, (int) (255 / (double) counter), (int) (255 / (double) counter))));
+                    }
+                })
+                .delayTicks(1)
+                .period(1)
+                .sync()
+                .run();
     }
 
     public void teleport(Location location) {

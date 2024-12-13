@@ -5,6 +5,7 @@ import com.magmaguy.freeminecraftmodels.api.ModeledEntityManager;
 import com.magmaguy.freeminecraftmodels.customentity.ModeledEntity;
 import lombok.Getter;
 import lombok.Setter;
+import one.tranic.irs.PluginSchedulerBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -14,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
@@ -65,12 +65,11 @@ public class LegacyHitDetection implements Listener {
 
     private static void addCooldown(Player player) {
         cooldowns.add(player.getUniqueId());
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                cooldowns.remove(player.getUniqueId());
-            }
-        }.runTaskLater(MetadataHandler.PLUGIN, 1);
+        PluginSchedulerBuilder.builder(MetadataHandler.PLUGIN)
+                .sync()
+                .delayTicks(1)
+                .task(() -> cooldowns.remove(player.getUniqueId()))
+                .run();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
